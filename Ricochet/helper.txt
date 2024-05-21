@@ -1,0 +1,128 @@
+#include <SFML/Graphics.hpp>
+#include <cmath>
+
+const float PI = 3.14159265358979323846f;
+
+struct Laser {
+  sf::Vector2f position;
+  sf::Vector2f direction;
+  float length;
+  sf::Color color;
+
+  Laser(const sf::Vector2f& pos, const sf::Vector2f& dir, float len, const sf::Color& col) :
+    position(pos), direction(dir), length(len), color(col) {}
+
+  void update(const sf::Vector2f& mirrorPosition, const sf::Vector2f& mirrorSize) {
+    // Проверка столкновения с зеркалом
+    sf::Vector2f intersectionPoint;
+    if (intersects(mirrorPosition, mirrorSize, intersectionPoint)) {
+      // Отражение луча от зеркала
+      direction = reflect(direction, getNormal(mirrorPosition, mirrorSize, intersectionPoint));
+      length = std::sqrt(std::pow(intersectionPoint.x - position.x, 2) + std::pow(intersectionPoint.y - position.y, 2));
+      position = intersectionPoint;
+    } else {
+      // Продолжение движения луча
+      length += 10.0f;
+    }
+  }
+
+  void draw(sf::RenderWindow& window) {
+    sf::Vertex line[] = {
+      sf::Vertex(position, color),
+      sf::Vertex(position + direction * length, color)
+    };
+    window.draw(line, 2, sf::Lines);
+  }
+
+private:
+  // Проверка столкновения луча с прямоугольником
+  bool intersects(const sf::Vector2f& rectPos, const sf::Vector2f& rectSize, sf::Vector2f& intersectionPoint) {
+    // Уравнение прямой луча
+    float a = direction.y / direction.x;
+    float b = position.y - a * position.x;
+
+    // Проверка пересечения с границами прямоугольника
+    float x1 = rectPos.x;
+    float x2 = rectPos.x + rectSize.x;
+    float y1 = rectPos.y;
+    float y2 = rectPos.y + rectSize.y;
+
+    // Проверка пересечения с верхней и нижней границами
+    if (intersectsLine(x1, x2, y1, a, b, intersectionPoint)) return true;
+    if (intersectsLine(x1, x2, y2, a, b, intersectionPoint)) return true;
+
+    // Проверка пересечения с левой и правой границами
+    if (intersectsLine(y1, y2, x1, 1.0f / a, -x1 / a + position.y / a, intersectionPoint)) return true;
+    if (intersectsLine(y1, y2, x2, 1.0f / a, -x2 / a + position.y / a, intersectionPoint)) return true;
+
+    return false;
+  }
+
+  // Проверка пересечения прямой с отрезком
+  bool intersectsLine(float x1, float x2, float y, float a, float b, sf::Vector2f& intersectionPoint) {
+    // Вычисление точки пересечения
+    float x = (y - b) / a;
+
+    // Проверка, находится ли точка пересечения на отрезке
+    if (x >= x1 && x <= x2) {
+      intersectionPoint = sf::Vector2f(x, y);
+      return true;
+    }
+    return false;
+  }
+
+  // Вычисление нормали к поверхности зеркала
+  sf::Vector2f getNormal(const sf::Vector2f& rectPos, const sf::Vector2f& rectSize, const sf::Vector2f& intersectionPoint) {
+    // Определение стороны зеркала, с которой произошёл контакт
+    if (intersectionPoint.x == rectPos.x) return sf::Vector2f(-1.0f, 0.0f);
+    if (intersectionPoint.x == rectPos.x + rectSize.x) return sf::Vector2f(1.0f, 0.0f);
+    if (intersectionPoint.y == rectPos.y) return sf::Vector2f(0.0f, -1.0f);
+    if (intersectionPoint.y == rectPos.y + rectSize.y) return sf::Vector2f(0.0f, 1.0f);
+
+    return sf::Vector2f(0.0f, 0.0f);
+  }
+
+  // Вычисление отражения вектора от поверхности
+  sf::Vector2f reflect(const sf::Vector2f& incident, const sf::Vector2f& normal) {
+    return incident - 2.0f * dotProduct(incident, normal) * normal;
+  }
+
+  // Вычисление скалярного произведения векторов
+  float dotProduct(const sf::Vector2f& v1, const sf::Vector2f& v2) {
+    return v1.x * v2.x + v1.y * v2.y;
+  }
+};
+
+int main() {
+  sf::RenderWindow window(sf::VideoMode(800, 600), "Laser Beam");
+
+  // Создание объекта луча
+  Laser laser(sf::Vector2f(100.0f, 100.0f), sf::Vector2f(1.0f, 0.0f), 10.0f, sf::Color::Red);
+
+  // Создание объекта зеркала
+  sf::RectangleShape mirror(sf::Vector2f(100.0f, 20.0f));
+  mirror.setFillColor(sf::Color::Blue);
+  mirror.setPosition(sf::Vector2f(300.0f, 200.0f));
+
+  while (window.isOpen()) {
+    sf::Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == sf::Event::Closed) window.close();
+    }
+
+    // Обновление луча
+    laser.update(mirror.getPosition(), mirror.getSize());
+
+    // Очистка экрана
+    window.clear();
+
+    // Рисование луча и зеркала
+    laser.draw(window);
+    window.draw(mirror);
+
+    // Отображение
+    window.display();
+  }
+
+  return 0;
+}
