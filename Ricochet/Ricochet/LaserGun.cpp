@@ -1,24 +1,48 @@
+// LaserGun.cpp
 #include "LaserGun.h"
 
-LaserGun::LaserGun() {}
 
-void LaserGun::create(int x, int y, sf::Vector2f s) {
-	
-	objectSize = s;
-	mouseColliderSize = objectSize;
+LaserGun::LaserGun(float x, float y, sf::Vector2f objectSize, sf::Vector2f vel) :
+    GameObject(x, y, objectSize), laser(sf::Vector2f(x,y), vel), active(false) {
 
-	// Создаем коллайдер
-	mouseCollider.setSize(mouseColliderSize);
-	mouseCollider.setFillColor(sf::Color(0, 255, 255, 0));
-	mouseCollider.setOrigin(sf::Vector2f(objectSize.x / 2, objectSize.y / 2));
-	mouseCollider.setPosition(sf::Vector2f(x, y));
+    delete object; // Освободим память от старой фигуры
 
-	// Создаем объект
-	object.setSize(objectSize);
-	object.setFillColor(sf::Color::Red);
-	object.setOrigin(sf::Vector2f(objectSize.x / 2, objectSize.y / 2));
-	object.setPosition(sf::Vector2f(x, y));
+    // Создаем объект
+    object = new sf::CircleShape(objectSize.x / 2);
+    object->setFillColor(sf::Color::Red);
+    object->setOrigin(sf::Vector2f(objectSize.x / 2, objectSize.x / 2));
+    object->setPosition(sf::Vector2f(x, y));
+}
 
+void LaserGun::update() {
+    // Обновление состояния лазерного луча
+    if (active) {
+        laser.update();
+    }
+}
+
+void LaserGun::setActive(bool activity) {
+    active = activity;
+}
+
+bool LaserGun::isActive() const {
+    return active;
+}
+
+void LaserGun::setVelocity(sf::Vector2f newVel) {
+    laser.setVelocity(newVel);
+}
+
+sf::Vector2f LaserGun::getReflectedVelocity(int reflectionAngle) {
+    return laser.getReflectedVelocity(reflectionAngle);
+}
+
+void LaserGun::drawLaser(sf::RenderWindow& window) {
+    // Отрисовать лазерный луч
+    laser.draw(window);
 }
 
 LaserGun::~LaserGun() {}
+
+
+

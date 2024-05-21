@@ -1,12 +1,35 @@
+// LaserGun.h
 #pragma once
-#include "RotatingObject.h"
+#include "GameObject.h"
+#include "Laser.h"
 
-class LaserGun : public RotatingObject
-{
+// Объект источника лазера
+class LaserGun : public GameObject {
+private:
+    bool active; // Статус активности оружия
+    Laser laser;   // Объект лазерного луча
+
 public:
-	LaserGun();
-	~LaserGun();
+    LaserGun(float x, float y, sf::Vector2f size, sf::Vector2f vel);
 
-	void create(int, int, sf::Vector2f);
+    // Обновление лазерного луча
+    void update();
+
+    // Установить статус активности оружия
+    void setActive(bool active);
+
+    // Проверить, активно ли оружие
+    bool isActive() const;
+
+    // Задать новый вектор velocity
+    void setVelocity(sf::Vector2f newVel);
+
+    // Получить новый вектор velocity после отражения
+    sf::Vector2f getReflectedVelocity(int reflectionAngle);
+
+    // Отрисовать лазер
+    void drawLaser(sf::RenderWindow& window);
+
+    ~LaserGun();
 };
 

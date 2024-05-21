@@ -132,15 +132,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameField.cpp" />
+    <ClCompile Include="Laser.cpp" />
     <ClCompile Include="LaserGun.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mirror.cpp" />
-    <ClCompile Include="RotatingObject.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Target.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameField.h" />
+    <ClInclude Include="Laser.h" />
     <ClInclude Include="LaserGun.h" />
     <ClInclude Include="Mirror.h" />
-    <ClInclude Include="RotatingObject.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Target.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
