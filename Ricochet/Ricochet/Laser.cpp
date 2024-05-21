@@ -2,40 +2,39 @@
 #include <iostream>
 
 Laser::Laser(sf::Vector2f gunPosition, sf::Vector2f vel) : velocity(0, 0) {
-    // Установка начальных параметров лазера
-    shape.setSize(sf::Vector2f(10, 10));       // Устанавливаем размеры лазера
-    shape.setFillColor(sf::Color::Red);        // Устанавливаем цвет лазера
-    shape.setPosition(gunPosition);            // Устанавливаем начальное положение лазера
-    velocity = vel;                            // Устаналиваем вектор направления-скорости лазера
+    // РЈСЃС‚Р°РЅРѕРІРєР° РЅР°С‡Р°Р»СЊРЅС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ Р»Р°Р·РµСЂР°
+    shape.setSize(sf::Vector2f(10, 10));       // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЂР°Р·РјРµСЂС‹ Р»Р°Р·РµСЂР°
+    shape.setFillColor(sf::Color::Red);        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С†РІРµС‚ Р»Р°Р·РµСЂР°
+    shape.setPosition(gunPosition);            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР°С‡Р°Р»СЊРЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ Р»Р°Р·РµСЂР°
+    velocity = vel;                            // РЈСЃС‚Р°РЅР°Р»РёРІР°РµРј РІРµРєС‚РѕСЂ РЅР°РїСЂР°РІР»РµРЅРёСЏ-СЃРєРѕСЂРѕСЃС‚Рё Р»Р°Р·РµСЂР°
 }
 
-// Метод обновления положения лазера
+// РњРµС‚РѕРґ РѕР±РЅРѕРІР»РµРЅРёСЏ РїРѕР»РѕР¶РµРЅРёСЏ Р»Р°Р·РµСЂР°
 void Laser::update() {
-    // Обновляем положение лазера с учетом скорости
+    // РћР±РЅРѕРІР»СЏРµРј РїРѕР»РѕР¶РµРЅРёРµ Р»Р°Р·РµСЂР° СЃ СѓС‡РµС‚РѕРј СЃРєРѕСЂРѕСЃС‚Рё
     shape.move(velocity);
     std::cout << "Laser position: " << shape.getPosition().x << " " << shape.getPosition().y << std::endl;
 }
 
-// Метод отрисовки лазера на экране
+// РњРµС‚РѕРґ РѕС‚СЂРёСЃРѕРІРєРё Р»Р°Р·РµСЂР° РЅР° СЌРєСЂР°РЅРµ
 void Laser::draw(sf::RenderWindow& window) {
     window.draw(shape);
 }
 
-// Метод получения глобальных координат лазера
+// РњРµС‚РѕРґ РїРѕР»СѓС‡РµРЅРёСЏ РіР»РѕР±Р°Р»СЊРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚ Р»Р°Р·РµСЂР°
 sf::Vector2f Laser::getPosition() const {
     return shape.getPosition();
 }
 
-// Метод задания нового вектора velocity лазера
+// РњРµС‚РѕРґ Р·Р°РґР°РЅРёСЏ РЅРѕРІРѕРіРѕ РІРµРєС‚РѕСЂР° velocity Р»Р°Р·РµСЂР°
 void Laser::setVelocity(sf::Vector2f newVel) {
     velocity = newVel;
 }
 
-sf::Vector2f getReflectedVelocity(int reflectionAngle) {
+sf::Vector2f Laser::getReflectedVelocity(int reflectionAngle) {
     float newVelX, newVelY;
 
-    if ((reflectionAngle >= 0 && reflectionAngle < 90) or
-        (reflectionAngle >= 180 && reflectionAngle < 270)) {
+    /*if (reflectionAngle >= 0 && reflectionAngle < 90) {
         newVelX = cos(reflectionAngle);
         newVelY = sin(reflectionAngle);
     }
@@ -43,18 +42,17 @@ sf::Vector2f getReflectedVelocity(int reflectionAngle) {
         newVelX = -cos(reflectionAngle);
         newVelY = sin(reflectionAngle);
     }
-    else if (reflectionAngle >= 180 && reflectionAngle <= 270) {
+    else if (reflectionAngle >= 180 && reflectionAngle < 270) {
         newVelX = -cos(reflectionAngle);
         newVelY = -sin(reflectionAngle);
     }
-    else {
+    else if (reflectionAngle >= 270 && reflectionAngle <= 359) {
         newVelX = cos(reflectionAngle);
         newVelY = -sin(reflectionAngle);
-    }
+    }*/
 
     return sf::Vector2f(newVelX, newVelY);
 }
-
 
 
 Laser::~Laser() {}
