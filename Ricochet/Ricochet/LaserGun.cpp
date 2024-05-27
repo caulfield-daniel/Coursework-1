@@ -1,23 +1,67 @@
 // LaserGun.cpp
 #include "LaserGun.h"
+#include <SFML/Graphics.hpp>
+#include "GameMath.h"
 
+LaserGun::LaserGun(float x, float y, sf::Vector2f objectSize, float speed, float angle) :
+    GameObject(x, y, objectSize), active(false),
+    direction(GameMath::getDirectionFromAngle(angle)),
+    angle(angle), laser(nullptr) {
 
-LaserGun::LaserGun(float x, float y, sf::Vector2f objectSize, sf::Vector2f vel) :
-    GameObject(x, y, objectSize), laser(sf::Vector2f(x,y), vel), active(false) {
+    // Создаем лазер
+    laser = new Laser(sf::Vector2f(x, y), speed, direction);
 
-    delete object; // Освободим память от старой фигуры
+    // Создаем пушку
+    object.setRotation(-angle);
+    sprite.setRotation(-angle);
+    object.setFillColor(sf::Color::Transparent);
+}
 
-    // Создаем объект
-    object = new sf::CircleShape(objectSize.x / 2);
-    object->setFillColor(sf::Color::Red);
-    object->setOrigin(sf::Vector2f(objectSize.x / 2, objectSize.x / 2));
-    object->setPosition(sf::Vector2f(x, y));
+LaserGun::LaserGun() : GameObject(), active(false),
+direction(1.0f, 0.0f), angle(0), laser(nullptr) {
+    // Создаем лазер
+    laser = new Laser(sf::Vector2f(x, y), 0, direction);
+
+    // Создаем пушку
+    object.setRotation(-angle);
+    sprite.setRotation(-angle);
+    object.setFillColor(sf::Color::Transparent);
+}
+
+void LaserGun::rotateLeft() {
+    angle = std::fmod(angle - 30, 360); // В соответствии с тригонометрической окружностью
+    direction = GameMath::normalize(GameMath::getDirectionFromAngle(angle));
+}
+
+void LaserGun::rotateRight() {
+    angle = std::fmod(angle + 30, 360); // В соответствии с тригонометрической окружностью
+    direction = GameMath::normalize(GameMath::getDirectionFromAngle(angle));
+}
+
+int LaserGun::getRotationAngle() const {
+    return angle;
+}
+
+sf::Vector2f LaserGun::getDirection() const {
+    return direction;
+}
+
+sf::Vector2f LaserGun::getLaserVelocity() const {
+    return laser->getVelocity();
 }
 
 void LaserGun::update() {
+    object.setRotation(angle);
+    laser->setRotation(angle);
+    sprite.setRotation(angle);
+
     // Обновление состояния лазерного луча
     if (active) {
-        laser.update();
+        laser->setActive(true);
+        laser->update();
+    }
+    else {
+        laser->setActive(false);
     }
 }
 
@@ -30,19 +74,36 @@ bool LaserGun::isActive() const {
 }
 
 void LaserGun::setVelocity(sf::Vector2f newVel) {
-    laser.setVelocity(newVel);
+    laser->setVelocity(newVel);
 }
 
-sf::Vector2f LaserGun::getReflectedVelocity(int reflectionAngle) {
-    return laser.getReflectedVelocity(reflectionAngle);
+sf::Vector2f LaserGun::getStartVelocity(const sf::Vector2f& gunDirection) {
+    return laser->getStartVelocity(gunDirection);
 }
 
-void LaserGun::drawLaser(sf::RenderWindow& window) {
+sf::Vector2f LaserGun::getReflectedVelocity(const sf::Vector2f& reflectionDirection) {
+    return laser->getReflectedVelocity(reflectionDirection);
+}
+
+sf::FloatRect LaserGun::getLaserGlobalBounds() const {
+    return laser->getGlobalBounds();
+}
+
+void LaserGun::reset() {
+    if (laser) {
+        // Перемещаем лазер в исходное положение
+        laser->setPosition(object.getPosition());
+        laser->setVelocity(getStartVelocity(direction));
+        active = false;
+    }
+}
+
+void LaserGun::drawLaser(sf::RenderWindow& window, int laserLength) {
     // Отрисовать лазерный луч
-    laser.draw(window);
+    if (laser)
+        laser->draw(window, laserLength);
 }
 
-LaserGun::~LaserGun() {}
-
-
-
+LaserGun::~LaserGun() {
+    delete laser;
+}

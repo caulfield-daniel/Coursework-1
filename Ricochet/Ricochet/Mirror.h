@@ -4,10 +4,12 @@
 
 class Mirror : public GameObject {
 private:
-    int angle;
+    sf::Vector2f direction; // Вектор направления зеркала
+    float angle; // Угол поворота зеркала (в градусах)
 
 public:
-    Mirror(int x2, int y2, sf::Vector2f size, int angle);
+    Mirror(int x2, int y2, sf::Vector2f size, float angle);
+    Mirror();
     ~Mirror();
 
     // Поворачивает объект влево на 30 градусов
@@ -15,10 +17,14 @@ public:
 
     // Поворачивает объект вправо на 30 градусов
     void rotateRight();
+    
+    // Узнать текущий угол поворота
+    int getRotationAngle() const;
 
-    // Возвращает текущий угол поворота зеркала
-    int getAngle();
+    // Возвращает текущий вектор направления зеркала
+    sf::Vector2f getDirection() const;
 
-    // Установка текстуры (наследуется от GameObject)
-    void setTexture(const std::string& filename);
+    // Обновление состояния
+    void update();
+
 };

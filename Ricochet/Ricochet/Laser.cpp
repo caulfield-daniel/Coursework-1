@@ -1,58 +1,84 @@
 #include "Laser.h"
 #include <iostream>
+#include "GameMath.h"
 
-Laser::Laser(sf::Vector2f gunPosition, sf::Vector2f vel) : velocity(0, 0) {
-    // РЈСЃС‚Р°РЅРѕРІРєР° РЅР°С‡Р°Р»СЊРЅС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ Р»Р°Р·РµСЂР°
-    shape.setSize(sf::Vector2f(10, 10));       // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЂР°Р·РјРµСЂС‹ Р»Р°Р·РµСЂР°
-    shape.setFillColor(sf::Color::Red);        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С†РІРµС‚ Р»Р°Р·РµСЂР°
-    shape.setPosition(gunPosition);            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР°С‡Р°Р»СЊРЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ Р»Р°Р·РµСЂР°
-    velocity = vel;                            // РЈСЃС‚Р°РЅР°Р»РёРІР°РµРј РІРµРєС‚РѕСЂ РЅР°РїСЂР°РІР»РµРЅРёСЏ-СЃРєРѕСЂРѕСЃС‚Рё Р»Р°Р·РµСЂР°
+Laser::Laser(sf::Vector2f gunPosition, float speed, sf::Vector2f direction) : direction(direction), speed(speed), active(false) {
+    // Установка начальных параметров лазера
+    velocity = direction * speed;
+    shape.setSize(sf::Vector2f(2,2));          // Устанавливаем размеры лазера
+    shape.setOrigin(sf::Vector2f(1, 1));
+    shape.setFillColor(sf::Color::Red); // Устанавливаем цвет лазера
+    shape.setPosition(gunPosition);             // Устанавливаем начальное положение лазера
 }
 
-// РњРµС‚РѕРґ РѕР±РЅРѕРІР»РµРЅРёСЏ РїРѕР»РѕР¶РµРЅРёСЏ Р»Р°Р·РµСЂР°
+// Метод обновления положения лазера
 void Laser::update() {
-    // РћР±РЅРѕРІР»СЏРµРј РїРѕР»РѕР¶РµРЅРёРµ Р»Р°Р·РµСЂР° СЃ СѓС‡РµС‚РѕРј СЃРєРѕСЂРѕСЃС‚Рё
-    shape.move(velocity);
-    std::cout << "Laser position: " << shape.getPosition().x << " " << shape.getPosition().y << std::endl;
+    // Обновляем положение лазера с учетом скорости
+    shape.move(velocity*speed);
 }
 
-// РњРµС‚РѕРґ РѕС‚СЂРёСЃРѕРІРєРё Р»Р°Р·РµСЂР° РЅР° СЌРєСЂР°РЅРµ
-void Laser::draw(sf::RenderWindow& window) {
-    window.draw(shape);
+// Метод отрисовки лазера на экране
+void Laser::draw(sf::RenderWindow& window, int laserLength) {
+    if (active) {
+        sf::VertexArray laserLine(sf::Lines, 2);    // Создаем луч
+        laserLine[0].position = shape.getPosition();
+        laserLine[1].position = shape.getPosition() - sf::Vector2f(velocity.x * laserLength, velocity.y * laserLength); // Продолжаем линию на 100 пикселей
+        laserLine[0].color = sf::Color::Red;
+        laserLine[1].color = sf::Color::Red;
+
+        // Отрисовываем луч
+        window.draw(laserLine);
+    }
 }
 
-// РњРµС‚РѕРґ РїРѕР»СѓС‡РµРЅРёСЏ РіР»РѕР±Р°Р»СЊРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚ Р»Р°Р·РµСЂР°
+// Метод получения глобальных координат лазера
 sf::Vector2f Laser::getPosition() const {
     return shape.getPosition();
 }
 
-// РњРµС‚РѕРґ Р·Р°РґР°РЅРёСЏ РЅРѕРІРѕРіРѕ РІРµРєС‚РѕСЂР° velocity Р»Р°Р·РµСЂР°
+void Laser::setPosition(sf::Vector2f newPosition) {
+    shape.setPosition(newPosition);
+}
+
+// Метод задания нового вектора velocity лазера
 void Laser::setVelocity(sf::Vector2f newVel) {
     velocity = newVel;
 }
 
-sf::Vector2f Laser::getReflectedVelocity(int reflectionAngle) {
-    float newVelX, newVelY;
-
-    /*if (reflectionAngle >= 0 && reflectionAngle < 90) {
-        newVelX = cos(reflectionAngle);
-        newVelY = sin(reflectionAngle);
-    }
-    else if (reflectionAngle >= 90 && reflectionAngle < 180) {
-        newVelX = -cos(reflectionAngle);
-        newVelY = sin(reflectionAngle);
-    }
-    else if (reflectionAngle >= 180 && reflectionAngle < 270) {
-        newVelX = -cos(reflectionAngle);
-        newVelY = -sin(reflectionAngle);
-    }
-    else if (reflectionAngle >= 270 && reflectionAngle <= 359) {
-        newVelX = cos(reflectionAngle);
-        newVelY = -sin(reflectionAngle);
-    }*/
-
-    return sf::Vector2f(newVelX, newVelY);
+sf::Vector2f Laser::getVelocity() {
+    return velocity;
 }
 
+sf::FloatRect Laser::getGlobalBounds() {
+    return shape.getGlobalBounds();
+}
+
+sf::Vector2f Laser::getStartVelocity(const sf::Vector2f& gunDirection) {
+    // Нормализуем вектор направления пушки
+    sf::Vector2f direction = GameMath::normalize(gunDirection);
+
+    // Умножаем нормализованное направление на начальную скорость лазера
+    return direction * speed;
+}
+
+sf::Vector2f Laser::getReflectedVelocity(const sf::Vector2f& reflectionDirection) {
+    // Нормализуем вектор направления отражения
+    sf::Vector2f reflection = GameMath::normalize(reflectionDirection);
+
+    // Вычисляем отраженный вектор скорости
+    float dotProduct = 2 * (velocity.x * reflection.x + velocity.y * reflection.y);
+    float newX = velocity.x - dotProduct * reflection.x;
+    float newY = velocity.y - dotProduct * reflection.y;
+
+    return sf::Vector2f(newX, newY);
+}
+
+void Laser::setActive(bool activity) {
+    active = activity;
+}
+
+void Laser::setRotation(int angle) {
+    shape.setRotation(angle);
+}
 
 Laser::~Laser() {}
